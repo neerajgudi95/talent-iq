@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ["candidate", "employee", "hr"],
+        values: ["internal", "external"],
         message: `{VALUE} is not a valid role`,
       },
     },
@@ -59,7 +59,10 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    resume: { type: String },
+    resume: {
+      publicId: { type: String },
+      cloudUrl: { type: String },
+    },
 
     skills: { type: [String] },
 
@@ -80,7 +83,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.getJWT = function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id }, "Legend@003", {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "5d",
   });
   return token;
@@ -90,10 +93,8 @@ userSchema.methods.validatePassword = async function (userPassword) {
   const user = this;
   const passwordHash = user.password;
   const isPasswordValid = await bcrypt.compare(userPassword, passwordHash);
-
   return isPasswordValid;
 };
 
-const UserModel = new mongoose.model("User", userSchema);
 
-module.exports = UserModel;
+module.exports = new mongoose.model("User", userSchema);

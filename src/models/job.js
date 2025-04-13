@@ -25,6 +25,14 @@ const jobSchema = new mongoose.Schema(
         message: `{VALUE} is not a valid job type`,
       },
     },
+    visibility: {
+      type: String,
+      enum: {
+        values: ["external", "internal"],
+        message: `{VALUE} is not a valid job type`,
+      },
+      default: "internal",
+    },
     salary: {
       type: Number,
     },
@@ -39,6 +47,12 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const JobModel = new mongoose.model("Job", jobSchema);
+jobSchema.index({
+  title: "text",
+  description: "text",
+  location: "text",
+  skillsRequired: "text",
+});
 
+const JobModel = new mongoose.model("Job", jobSchema);
 module.exports = JobModel;
